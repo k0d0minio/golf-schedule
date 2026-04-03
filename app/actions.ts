@@ -50,10 +50,10 @@ export async function createSubdomainAction(
     };
   }
 
-  await redis.set(`subdomain:${sanitizedSubdomain}`, {
-    emoji: icon,
-    createdAt: Date.now()
-  });
+  await redis.set(
+    `subdomain:${sanitizedSubdomain}`,
+    JSON.stringify({ emoji: icon, createdAt: Date.now() })
+  );
 
   redirect(`${protocol}://${sanitizedSubdomain}.${rootDomain}`);
 }

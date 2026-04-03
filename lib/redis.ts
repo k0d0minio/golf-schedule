@@ -1,6 +1,9 @@
-import { Redis } from '@upstash/redis';
+import Redis from 'ioredis';
 
-export const redis = new Redis({
-  url: process.env.KV_REST_API_URL,
-  token: process.env.KV_REST_API_TOKEN
-});
+const getRedisClient = () => {
+  const url = process.env.REDIS_URL;
+  if (!url) throw new Error('REDIS_URL environment variable is not set');
+  return new Redis(url);
+};
+
+export const redis = getRedisClient();
