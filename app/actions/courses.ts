@@ -6,11 +6,9 @@ import {
   createSupabaseServiceClient,
 } from '@/lib/supabase-server';
 import { isValidSlug } from '@/lib/tenant-validation';
+import type { ActionResponse } from '@/types/actions';
 
 type CourseResult = { slug: string; requiresConfirmation: boolean };
-type ActionResponse<T = void> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 /**
  * Creates a Supabase user account and a tenant in one shot.
