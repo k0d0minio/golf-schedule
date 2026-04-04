@@ -1,9 +1,10 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabase-server';
 import { getTenantId } from '@/lib/tenant';
 import { getUserRole } from '@/lib/membership';
+import { protocol, rootDomain } from '@/lib/utils';
 
 export async function signIn(_prevState: unknown, formData: FormData) {
   const email = formData.get('email') as string;
@@ -61,6 +62,33 @@ export async function requireUser() {
  * Safe to call from client components via useEffect — returns null values
  * rather than throwing when outside tenant context.
  */
+/**
+ * Platform-level sign in. After authentication, looks up the user's tenant
+ * and redirects to their course subdomain.
+ */
+export async function platformSignIn(_prevState: unknown, formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) return { error: error.message };
+
+  // Look up the user's tenant via service client (bypasses RLS timing issues)
+  const serviceClient = createSupabaseServiceClient();
+  const { data: membership } = await serviceClient
+    .from('memberships')
+    .select('tenants(slug)')
+    .eq('user_id', data.user.id)
+    .maybeSingle();
+
+  const slug = (membership?.tenants as unknown as { slug: string } | null)?.slug;
+  if (!slug) return { error: 'No course found for this account.' };
+
+  redirect(`${protocol}://${slug}.${rootDomain}/`);
+}
+
 export async function getAuthState() {
   const user = await getUser();
   if (!user) return { user: null, role: null, isEditor: false };

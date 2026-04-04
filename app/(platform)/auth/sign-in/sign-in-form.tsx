@@ -2,15 +2,15 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
-import { signIn } from '@/app/actions/auth';
+import { platformSignIn } from '@/app/actions/auth';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function SignInForm({ redirectTo }: { redirectTo: string }) {
-  const [state, action, isPending] = useActionState(signIn, null);
+export function SignInForm() {
+  const [state, action, isPending] = useActionState(platformSignIn, null);
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-4">
@@ -27,7 +27,6 @@ export function SignInForm({ redirectTo }: { redirectTo: string }) {
           </CardHeader>
 
           <form action={action}>
-            <input type="hidden" name="redirectTo" value={redirectTo} />
             <CardContent className="space-y-4">
               {state?.error && (
                 <p className="text-sm text-destructive">{state.error}</p>
@@ -61,12 +60,9 @@ export function SignInForm({ redirectTo }: { redirectTo: string }) {
                 {isPending ? 'Signing in…' : 'Sign in'}
               </Button>
               <p className="text-sm text-muted-foreground text-center">
-                Don&apos;t have an account?{' '}
-                <Link
-                  href={`/auth/sign-up${redirectTo !== '/tenants' ? `?next=${encodeURIComponent(redirectTo)}` : ''}`}
-                  className="underline underline-offset-4"
-                >
-                  Sign up
+                Don&apos;t have a course yet?{' '}
+                <Link href="/new" className="underline underline-offset-4">
+                  Create one
                 </Link>
               </p>
             </CardFooter>
