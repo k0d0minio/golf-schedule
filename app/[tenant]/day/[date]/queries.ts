@@ -1,9 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import type { ProgramItem, Reservation, HotelBooking, BreakfastConfiguration } from '@/types/index';
 
-// These queries target tables created in T-20, T-23, T-25, T-26.
-// Until those migrations are applied they return empty arrays gracefully.
-
 export async function getProgramItemsForDay(
   tenantId: string,
   dayId: string
@@ -24,11 +21,11 @@ export async function getReservationsForDay(
 ): Promise<Reservation[]> {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
-    .from('reservations')
-    .select('*, hotel_bookings(*)')
+    .from('reservation')
+    .select('*, hotel_booking(*), program_item(*)')
     .eq('tenant_id', tenantId)
     .eq('day_id', dayId)
-    .order('tee_time', { nullsFirst: true });
+    .order('start_time', { nullsFirst: true });
   return (data ?? []) as unknown as Reservation[];
 }
 
@@ -37,9 +34,8 @@ export async function getHotelBookingsForDate(
   dateIso: string
 ): Promise<HotelBooking[]> {
   const supabase = await createSupabaseServerClient();
-  // Bookings where check_in <= dateIso < check_out (guest is on property)
   const { data } = await supabase
-    .from('hotel_bookings')
+    .from('hotel_booking')
     .select('*')
     .eq('tenant_id', tenantId)
     .lte('check_in', dateIso)
@@ -54,7 +50,7 @@ export async function getBreakfastConfigsForDay(
 ): Promise<BreakfastConfiguration[]> {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
-    .from('breakfast_configurations')
+    .from('breakfast_configuration')
     .select('*')
     .eq('tenant_id', tenantId)
     .eq('breakfast_date', dateIso)
