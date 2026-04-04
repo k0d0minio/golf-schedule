@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { getTenantId } from '@/lib/tenant';
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -26,6 +27,19 @@ export async function createSupabaseServerClient() {
       },
     }
   );
+}
+
+/**
+ * Returns a Supabase server client together with the current tenant ID.
+ * One-stop convenience for server actions and route handlers that need both.
+ * RLS is the primary isolation mechanism; tenantId is needed for INSERT columns.
+ */
+export async function createTenantClient() {
+  const [supabase, tenantId] = await Promise.all([
+    createSupabaseServerClient(),
+    getTenantId(),
+  ]);
+  return { supabase, tenantId };
 }
 
 export function createSupabaseServiceClient() {
