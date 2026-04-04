@@ -1,6 +1,7 @@
 import {
   format,
   parse,
+  parseISO,
   startOfMonth,
   endOfMonth,
   addWeeks,
@@ -106,6 +107,26 @@ export function generateRecurrenceDates(
   }
 
   return results;
+}
+
+// ---------------------------------------------------------------------------
+// Range helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns an array of every YYYY-MM-DD date in [startDate, endDate] (inclusive).
+ */
+export function datesInRange(startDate: string, endDate: string): Ymd[] {
+  const dates: Ymd[] = [];
+  let current = parseISO(startDate);
+  const end = parseISO(endDate);
+
+  while (current <= end) {
+    dates.push(format(current, 'yyyy-MM-dd') as Ymd);
+    current = addDays(current, 1);
+  }
+
+  return dates;
 }
 
 function nextOccurrence(date: Date, frequency: Frequency): Date {
