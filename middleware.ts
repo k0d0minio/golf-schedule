@@ -38,10 +38,13 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Cookies must be shared across subdomains — strip port, prepend '.'.
+  const cookieDomain = '.' + rootDomain.split(':')[0];
+
   function applyAuthCookies(response: NextResponse): NextResponse {
     authCookies.forEach(({ name, value, options }) =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      response.cookies.set(name, value, options as any)
+      response.cookies.set(name, value, { ...(options as any), domain: cookieDomain })
     );
     return response;
   }
