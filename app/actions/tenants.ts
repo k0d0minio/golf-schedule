@@ -7,16 +7,13 @@ import {
 } from '@/lib/supabase-server';
 import { isValidSlug } from '@/lib/tenant-validation';
 import { getUser } from '@/app/actions/auth';
+import type { ActionResponse } from '@/types/actions';
 
 export type TenantRedisData = {
   id: string;
   name: string;
   slug: string;
 };
-
-type ActionResponse<T = void> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 // ---------------------------------------------------------------------------
 // createTenant
